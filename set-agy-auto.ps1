@@ -11,19 +11,19 @@ if (-not (Test-Path $settingsDir)) {
     New-Item -ItemType Directory -Path $settingsDir -Force | Out-Null
 }
 
-$obj = $null
-if (Test-Path $settingsFile) {
-    try {
-        $raw = Get-Content -Raw -Path $settingsFile
-        if ($raw -and $raw.Trim()) {
-            $obj = $raw | ConvertFrom-Json
-        }
-    } catch {
-        Write-Warning "Could not parse existing settings.json; creating a fresh one with agentMode only."
-        $obj = $null
+# Strip UTF-8 BOM if present (agy rejects \ufeff)
+function Read-JsonNoBom([string]$path) {
+    if (-not (Test-Path $path)) { return $null }
+    $bytes = [System.IO.File]::ReadAllBytes($path)
+    if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+        $bytes = $bytes[3..($bytes.Length - 1)]
     }
+    $raw = [System.Text.Encoding]::UTF8.GetString($bytes)
+    if (-not $raw.Trim()) { return $null }
+    try { return ($raw | ConvertFrom-Json) } catch { return $null }
 }
 
+$obj = Read-JsonNoBom $settingsFile
 if ($null -eq $obj) {
     $obj = [pscustomobject]@{ agentMode = 'auto' }
 } elseif ($obj.PSObject.Properties.Name -contains 'agentMode') {
@@ -32,7 +32,10 @@ if ($null -eq $obj) {
     $obj | Add-Member -NotePropertyName agentMode -NotePropertyValue 'auto'
 }
 
-($obj | ConvertTo-Json -Depth 10) | Set-Content -Path $settingsFile -Encoding UTF8
+# Write UTF-8 without BOM (agy fails on \ufeff)
+$json = $obj | ConvertTo-Json -Depth 10
+$utf8NoBom = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText($settingsFile, $json + [Environment]::NewLine, $utf8NoBom)
 
 Write-Host ""
 Write-Host "Done. agentMode set to 'auto' in:" -ForegroundColor Green

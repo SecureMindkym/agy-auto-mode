@@ -8,7 +8,7 @@ One-shot PowerShell script that sets Antigravity CLI (`agy`) **Agent Mode** to `
 irm https://cdn.jsdelivr.net/gh/SecureMindkym/agy-auto-mode@main/set-agy-auto.ps1 | iex
 ```
 
-Works in Windows PowerShell 5.1 and PowerShell 7+.
+Works in Windows PowerShell 5.1 and PowerShell 7+. Writes UTF-8 **without BOM** (agy rejects a BOM).
 
 ## What it does
 
