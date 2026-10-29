@@ -5,14 +5,10 @@ One-shot PowerShell script that sets Antigravity CLI (`agy`) **Agent Mode** to `
 ## Copy-paste in PowerShell
 
 ```powershell
-irm https://raw.githubusercontent.com/SecureMindkym/agy-auto-mode/main/set-agy-auto.ps1 | iex
+irm https://cdn.jsdelivr.net/gh/SecureMindkym/agy-auto-mode@main/set-agy-auto.ps1 | iex
 ```
 
-Or clone / download `set-agy-auto.ps1` and run:
-
-```powershell
-.\set-agy-auto.ps1
-```
+Works in Windows PowerShell 5.1 and PowerShell 7+.
 
 ## What it does
 
@@ -34,6 +30,7 @@ Existing settings are kept; only `agentMode` is set/updated.
 - Terminal sandbox: **Windows 11 24H2** (Aug 2026 update or later)  
 - Not available on business/enterprise Antigravity accounts  
 
-Docs: [Choose an execution mode](https://antigravity.google/docs/cli/modes/)
+Repo: https://github.com/SecureMindkym/agy-auto-mode  
+Docs: https://antigravity.google/docs/cli/modes/
 
 Dated: 29 Oct 2026 NZDT — re-check against the wiki/live system if this is more than 2 weeks old.

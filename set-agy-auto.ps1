@@ -1,5 +1,6 @@
 # Set Antigravity CLI (agy) to auto mode ("high-auto")
-# Copy-paste into PowerShell, or: irm https://raw.githubusercontent.com/SecureMindkym/agy-auto-mode/main/set-agy-auto.ps1 | iex
+# Copy-paste into PowerShell:
+#   irm https://cdn.jsdelivr.net/gh/SecureMindkym/agy-auto-mode@main/set-agy-auto.ps1 | iex
 
 $ErrorActionPreference = 'Stop'
 
@@ -10,21 +11,28 @@ if (-not (Test-Path $settingsDir)) {
     New-Item -ItemType Directory -Path $settingsDir -Force | Out-Null
 }
 
-$settings = @{}
+$obj = $null
 if (Test-Path $settingsFile) {
     try {
         $raw = Get-Content -Raw -Path $settingsFile
-        if ($raw.Trim()) {
-            $settings = $raw | ConvertFrom-Json -AsHashtable
+        if ($raw -and $raw.Trim()) {
+            $obj = $raw | ConvertFrom-Json
         }
     } catch {
         Write-Warning "Could not parse existing settings.json; creating a fresh one with agentMode only."
-        $settings = @{}
+        $obj = $null
     }
 }
 
-$settings['agentMode'] = 'auto'
-$settings | ConvertTo-Json -Depth 10 | Set-Content -Path $settingsFile -Encoding utf8
+if ($null -eq $obj) {
+    $obj = [pscustomobject]@{ agentMode = 'auto' }
+} elseif ($obj.PSObject.Properties.Name -contains 'agentMode') {
+    $obj.agentMode = 'auto'
+} else {
+    $obj | Add-Member -NotePropertyName agentMode -NotePropertyValue 'auto'
+}
+
+($obj | ConvertTo-Json -Depth 10) | Set-Content -Path $settingsFile -Encoding UTF8
 
 Write-Host ""
 Write-Host "Done. agentMode set to 'auto' in:" -ForegroundColor Green
